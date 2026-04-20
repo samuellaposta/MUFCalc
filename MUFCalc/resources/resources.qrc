@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>tpu_logo.png</file>
+        <file>flowchart.png</file>
+        <file>equations_diagram.png</file>
+    </qresource>
+</RCC>
