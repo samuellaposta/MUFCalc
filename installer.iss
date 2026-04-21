@@ -8,6 +8,8 @@ SetupIconFile=MUFCalc.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+WizardImageFile=MUFCalc\resources\WizardImage.bmp
+WizardSmallImageFile=MUFCalc\resources\WizardSmallImage.bmp
 
 [Files]
 Source: "deploy\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
@@ -18,5 +20,6 @@ Name: "{commondesktop}\MUFCalc"; Filename: "{app}\MUFCalc.exe"
 
 [Run]
 Filename: "{app}\MUFCalc.exe"; Description: "Launch MUFCalc"; Flags: nowait postinstall skipifsilent
+
 
 
