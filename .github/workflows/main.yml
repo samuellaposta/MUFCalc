@@ -29,26 +29,25 @@ jobs:
 
       - name: Deploy Qt dependencies
         shell: pwsh
-        run: |
-          $QT = "$env:Qt5_Dir"
-          $libgcc = (Get-ChildItem "C:\" -Recurse -Filter "libgcc_s_seh-1.dll" -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
-          $MINGW = Split-Path $libgcc
-          New-Item -ItemType Directory -Force -Path deploy\platforms
-          New-Item -ItemType Directory -Force -Path deploy\tls
+        run: |          $env:PATH = "$env:Qt5_Dir\bin;$env:PATH"
+          New-Item -ItemType Directory -Force -Path deploy
           Copy-Item "build\release\MUFCalc.exe" "deploy\"
-          foreach ($dll in @("Qt5Core","Qt5Gui","Qt5Widgets","Qt5Network")) {
-            Copy-Item "$QT\bin\$dll.dll" "deploy\"
-          }
-          foreach ($dll in @("libgcc_s_seh-1","libstdc++-6","libwinpthread-1")) {
-            Copy-Item "$MINGW\$dll.dll" "deploy\"
-          }
-          Copy-Item "$QT\plugins\platforms\qwindows.dll" "deploy\platforms\"
-          Get-ChildItem "$QT\plugins\tls" -ErrorAction SilentlyContinue | ForEach-Object { Copy-Item $_.FullName "deploy\tls\" }
-          choco install openssl --version=1.1.1.2100 -y --no-progress --force
-          $opensslDir = "C:\Program Files\OpenSSL\bin"
-          foreach ($dll in @("libssl-1_1-x64.dll","libcrypto-1_1-x64.dll")) {
-            $path = Join-Path $opensslDir $dll
-            if (Test-Path $path) { Copy-Item $path "deploy\"; Write-Host "Copied: $dll" }
+          cd deploy
+          windeployqt --release MUFCalc.exe
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           }
 
       - name: Build Installer
@@ -62,3 +61,4 @@ jobs:
         with:
           name: MUFCalc-Installer
           path: Output\MUFCalcSetup.exe
+
