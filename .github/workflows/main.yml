@@ -30,11 +30,9 @@ jobs:
       - name: Deploy Qt dependencies
         shell: cmd
         run: |
-          set PATH=%Qt5_Dir%\bin;%PATH%
           mkdir deploy
           copy build\release\MUFCalc.exe deploy\
-          cd deploy
-          windeployqt --release MUFCalc.exe
+          windeployqt --release --dir deploy deploy\MUFCalc.exe
 
       - name: Build Installer
         shell: cmd
