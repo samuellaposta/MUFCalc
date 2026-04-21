@@ -27,19 +27,12 @@ jobs:
           qmake ..\MUFCalc\MUFCalc.pro CONFIG+=release
           mingw32-make -j4
 
-      - name: Debug Qt paths
-        shell: cmd
-        run: |
-          echo Qt5_Dir=%Qt5_Dir%
-          where windeployqt
-          dir "%Qt5_Dir%\bin\windeployqt.exe"
-
       - name: Deploy Qt dependencies
         shell: cmd
         run: |
           mkdir deploy
           copy build\release\MUFCalc.exe deploy\
-          "%Qt5_Dir%\bin\windeployqt.exe" --release --dir deploy deploy\MUFCalc.exe
+          D:\a\MUF_Cal_Fixed\Qt\5.15.2\mingw81_64\bin\windeployqt.exe --release --dir deploy deploy\MUFCalc.exe
 
       - name: Build Installer
         shell: cmd
