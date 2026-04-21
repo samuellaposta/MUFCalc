@@ -28,27 +28,13 @@ jobs:
           mingw32-make -j4
 
       - name: Deploy Qt dependencies
-        shell: pwsh
-        run: |          $env:PATH = "$env:Qt5_Dir\bin;$env:PATH"
-          New-Item -ItemType Directory -Force -Path deploy
-          Copy-Item "build\release\MUFCalc.exe" "deploy\"
+        shell: cmd
+        run: |
+          set PATH=%Qt5_Dir%\bin;%PATH%
+          mkdir deploy
+          copy build\release\MUFCalc.exe deploy\
           cd deploy
           windeployqt --release MUFCalc.exe
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          }
 
       - name: Build Installer
         shell: cmd
@@ -61,4 +47,3 @@ jobs:
         with:
           name: MUFCalc-Installer
           path: Output\MUFCalcSetup.exe
-
