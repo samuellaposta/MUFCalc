@@ -62,15 +62,15 @@ inline QString appStyle() {
 // Group boxes – clean, top accent only
 "QGroupBox{color:#1a3a5c;border:none;border-top:2px solid #1a3a5c;"
   "margin-top:18px;padding:14px 0 0 0;"
-  "font-weight:700;font-size:15px;letter-spacing:1.2px;background:transparent;}"
+  "font-weight:700;font-size:16px;letter-spacing:1.2px;background:transparent;}"
 "QGroupBox::title{subcontrol-origin:margin;left:0;padding:2px 10px;"
-  "background:#1a3a5c;color:white;font-size:14px;letter-spacing:1px;}"
+  "background:#1a3a5c;color:white;font-size:16px;letter-spacing:1px;}"
 // Tabs
 "QTabWidget::pane{border:1px solid #d1d8e0;"
   "background:rgba(255,255,255,0.97);margin-top:-1px;}"
 "QTabBar::tab{background:#e8eff5;color:#4a5568;padding:7px 18px;"
   "border:1px solid #d1d8e0;border-bottom:none;"
-  "border-radius:4px 4px 0 0;font-size:15px;font-weight:600;margin-right:2px;}"
+  "border-radius:4px 4px 0 0;font-size:16px;font-weight:600;margin-right:2px;}"
 "QTabBar::tab:selected{background:white;color:#1a3a5c;"
   "border-top:3px solid #1a3a5c;font-weight:700;}"
 "QTabBar::tab:hover:!selected{background:#dce8f0;}"
@@ -140,7 +140,7 @@ inline QString secondaryButtonStyle() {
 inline QString dangerButtonStyle() {
     return QStringLiteral(
 "QPushButton{background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5;"
-  "border-radius:3px;padding:6px 14px;font-size:15px;font-weight:600;}"
+  "border-radius:3px;padding:6px 14px;font-size:16px;font-weight:600;}"
 "QPushButton:hover{background:#fee2e2;}"
     );
 }
@@ -151,7 +151,7 @@ inline QString tableStyle() {
   "color:#000000;selection-background-color:#c8dff0;selection-color:#0f2438;}"
 "QTableWidget::item{padding:7px 12px;border:none;color:#000000;}"
 "QHeaderView::section{background:#1a3a5c;color:white;font-weight:700;"
-  "font-size:15px;letter-spacing:0.6px;padding:8px 12px;border:none;"
+  "font-size:16px;letter-spacing:0.6px;padding:8px 12px;border:none;"
   "border-right:1px solid #2d5680;}"
 "QHeaderView{background:#1a3a5c;}"
     );
@@ -159,6 +159,7 @@ inline QString tableStyle() {
 inline QString tabStyle() { return QString(); }
 
 } // namespace Styles
+
 
 
 
