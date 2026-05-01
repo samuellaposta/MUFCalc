@@ -1,8 +1,8 @@
 # ─────────────────────────────────────────────────────────────────────
 #  MUFCalc — Windows installer build & release workflow
 #
-#  Repo layout: project source lives under MUFCalc/ subfolder, with
-#  installer.iss and .github/ at the repo root.
+#  Builds with CMake against Qt 6.7 (pinned via CMAKE_PREFIX_PATH so the
+#  runner's pre-installed Qt 5.15 is ignored).
 # ─────────────────────────────────────────────────────────────────────
 name: Build Windows Installer
 
@@ -21,7 +21,7 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
-     - name: Install Qt 6
+      - name: Install Qt 6
         id: qt
         uses: jurplel/install-qt-action@v4
         with:
@@ -41,45 +41,46 @@ jobs:
           echo Qt6_DIR=%Qt6_DIR%
           echo QT_ROOT_DIR=%QT_ROOT_DIR%
           where qmake
-          where qmake6
-          dir "${{ env.IQTA_QT_BIN }}" 2>nul || echo IQTA_QT_BIN unset
-      
+          where cmake
+
       - name: Inject GITHUB_TOKEN secret into local_token.h
         shell: pwsh
         run: |
           $token = '${{ secrets.MUFCALC_GITHUB_TOKEN }}'
           if ([string]::IsNullOrWhiteSpace($token)) {
-            Write-Error "MUFCALC_GITHUB_TOKEN secret is not set on this repo. Add it under Settings → Secrets and variables → Actions."
+            Write-Error "MUFCALC_GITHUB_TOKEN secret is not set on this repo."
             exit 1
           }
           $content = "#define MUFCALC_GITHUB_TOKEN `"$token`"`n"
           Set-Content -Path "MUFCalc/src/gui/local_token.h" -Value $content -NoNewline -Encoding ASCII
           Write-Host "local_token.h written (length: $($content.Length) chars)"
 
-      - name: Configure with qmake
+      - name: Configure with CMake
         shell: cmd
         working-directory: MUFCalc
         run: |
-          mkdir build
-          cd build
-          "%Qt6_DIR%\bin\qmake.exe" ..\MUFCalc.pro CONFIG+=release
-          echo --- which qmake will the build use? ---
-          "%Qt6_DIR%\bin\qmake.exe" -v
+          cmake -S . -B build -G "MinGW Makefiles" ^
+            -DCMAKE_BUILD_TYPE=Release ^
+            -DCMAKE_PREFIX_PATH="%QT_ROOT_DIR%"
 
-      - name: Build
+      - name: Build with CMake
         shell: cmd
         working-directory: MUFCalc
         run: |
-          set PATH=%Qt6_DIR%\bin;%PATH%
-          cd build
-          mingw32-make -j2
+          cmake --build build --config Release -j 2
+
+      - name: Locate built MUFCalc.exe
+        shell: cmd
+        working-directory: MUFCalc
+        run: |
+          dir /s /b build\MUFCalc.exe
 
       - name: Stage runtime files with windeployqt
         shell: cmd
         run: |
           mkdir deploy
-          copy MUFCalc\build\release\MUFCalc.exe deploy\
-          "%Qt6_DIR%\bin\windeployqt.exe" --release --no-translations --no-system-d3d-compiler --no-opengl-sw deploy\MUFCalc.exe
+          copy MUFCalc\build\MUFCalc.exe deploy\ 2>nul || copy MUFCalc\build\Release\MUFCalc.exe deploy\
+          "%QT_ROOT_DIR%\bin\windeployqt.exe" --release --no-translations --no-system-d3d-compiler --no-opengl-sw deploy\MUFCalc.exe
 
       - name: Install Inno Setup
         shell: pwsh
@@ -96,7 +97,6 @@ jobs:
         shell: pwsh
         run: |
           Remove-Item -Path "MUFCalc/src/gui/local_token.h" -ErrorAction SilentlyContinue
-          Write-Host "local_token.h removed from runner."
 
       - name: Upload installer as workflow artifact
         uses: actions/upload-artifact@v4
