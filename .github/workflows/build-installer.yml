@@ -75,20 +75,21 @@ jobs:
         run: |
           dir /s /b build\MUFCalc.exe
 
-      - name: Stage runtime files with windeployqt
+     - name: Stage runtime files with windeployqt
         shell: cmd
         run: |
-          mkdir deploy
-          copy MUFCalc\build\MUFCalc.exe deploy\ 2>nul || copy MUFCalc\build\Release\MUFCalc.exe deploy\
-          "%QT_ROOT_DIR%\bin\windeployqt.exe" --release --no-translations --no-system-d3d-compiler --no-opengl-sw deploy\MUFCalc.exe
+          mkdir MUFCalc\deploy
+          copy MUFCalc\build\MUFCalc.exe MUFCalc\deploy\ 2>nul || copy MUFCalc\build\Release\MUFCalc.exe MUFCalc\deploy\
+          "%QT_ROOT_DIR%\bin\windeployqt.exe" --release --no-translations --no-system-d3d-compiler --no-opengl-sw MUFCalc\deploy\MUFCalc.exe
 
       - name: Install Inno Setup
         shell: pwsh
         run: |
           choco install innosetup --no-progress -y
 
-      - name: Compile installer
+     - name: Compile installer
         shell: cmd
+        working-directory: MUFCalc
         run: |
           "C:\Program Files (x86)\Inno Setup 6\iscc.exe" installer.iss
 
@@ -98,19 +99,17 @@ jobs:
         run: |
           Remove-Item -Path "MUFCalc/src/gui/local_token.h" -ErrorAction SilentlyContinue
 
-      - name: Upload installer as workflow artifact
+     - name: Upload installer as workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: MUFCalcSetup_v2
-          path: Output/MUFCalcSetup_v2.exe
-          if-no-files-found: error
-          retention-days: 30
+          path: MUFCalc/Output/MUFCalcSetup_v2.exe
 
       - name: Attach installer to GitHub Release (only on tag pushes)
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
-        with:
-          files: Output/MUFCalcSetup_v2.exe
+       with:
+          files: MUFCalc/Output/MUFCalcSetup_v2.exe
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
