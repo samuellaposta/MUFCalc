@@ -1,13 +1,16 @@
+#pragma once
 // ─────────────────────────────────────────────────────────────────────────
-//  MUFCalc :: main.cpp
+//  MUFCalc :: PlainTextReport
 // ─────────────────────────────────────────────────────────────────────────
 
-#include "app/Application.h"
-#include "gui/MainWindow.h"
+#include <QString>
+#include "../core/Types.h"
 
-int main(int argc, char* argv[]) {
-    MUFCalc::Application app(argc, argv);
-    MainWindow w;
-    w.show();
-    return app.exec();
-}
+namespace MUFCalc {
+
+class PlainTextReport {
+public:
+    QString render(const MufInput& input, const MufResult& result) const;
+};
+
+}  // namespace MUFCalc

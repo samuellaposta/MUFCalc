@@ -1,13 +1,16 @@
+#pragma once
 // ─────────────────────────────────────────────────────────────────────────
-//  MUFCalc :: main.cpp
+//  MUFCalc :: UncertaintyTab
+//  Per-term uncertainty contribution bars (Cᵢ progress display).
 // ─────────────────────────────────────────────────────────────────────────
 
-#include "app/Application.h"
-#include "gui/MainWindow.h"
+#include <QWidget>
+#include "../core/Types.h"
 
-int main(int argc, char* argv[]) {
-    MUFCalc::Application app(argc, argv);
-    MainWindow w;
-    w.show();
-    return app.exec();
-}
+class UncertaintyTab : public QWidget {
+    Q_OBJECT
+public:
+    UncertaintyTab(const MUFCalc::MufInput& input,
+                   const MUFCalc::MufResult& result,
+                   QWidget* parent = nullptr);
+};

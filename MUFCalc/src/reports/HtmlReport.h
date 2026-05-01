@@ -1,13 +1,17 @@
+#pragma once
 // ─────────────────────────────────────────────────────────────────────────
-//  MUFCalc :: main.cpp
+//  MUFCalc :: HtmlReport
+//  Renders a MufResult as a styled standalone HTML document.
 // ─────────────────────────────────────────────────────────────────────────
 
-#include "app/Application.h"
-#include "gui/MainWindow.h"
+#include <QString>
+#include "../core/Types.h"
 
-int main(int argc, char* argv[]) {
-    MUFCalc::Application app(argc, argv);
-    MainWindow w;
-    w.show();
-    return app.exec();
-}
+namespace MUFCalc {
+
+class HtmlReport {
+public:
+    QString render(const MufInput& input, const MufResult& result) const;
+};
+
+}  // namespace MUFCalc

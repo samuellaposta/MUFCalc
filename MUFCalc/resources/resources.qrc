@@ -1,9 +1,8 @@
 <RCC>
     <qresource prefix="/">
-        <file>tpu_logo.png</file>
-        <file>flowchart.png</file>
-        <file>MUFCalc_Flowchart.html</file>
-        <file>equations_diagram.png</file>
+        <file alias="tpu_logo.png">images/tpu_logo.png</file>
+        <file alias="flowchart.png">images/flowchart.png</file>
+        <file alias="equations_diagram.png">images/equations_diagram.png</file>
+        <file alias="MUFCalc_Flowchart.html">MUFCalc_Flowchart.html</file>
     </qresource>
 </RCC>
-

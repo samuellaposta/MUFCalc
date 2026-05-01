@@ -1,13 +1,16 @@
+#pragma once
 // ─────────────────────────────────────────────────────────────────────────
-//  MUFCalc :: main.cpp
+//  MUFCalc :: DiagnosticsTab
+//  Colour-coded safeguards flag cards.
 // ─────────────────────────────────────────────────────────────────────────
 
-#include "app/Application.h"
-#include "gui/MainWindow.h"
+#include <QWidget>
+#include "../core/Types.h"
 
-int main(int argc, char* argv[]) {
-    MUFCalc::Application app(argc, argv);
-    MainWindow w;
-    w.show();
-    return app.exec();
-}
+class DiagnosticsTab : public QWidget {
+    Q_OBJECT
+public:
+    DiagnosticsTab(const MUFCalc::MufInput& input,
+                   const MUFCalc::MufResult& result,
+                   QWidget* parent = nullptr);
+};

@@ -1,13 +1,17 @@
+#pragma once
 // ─────────────────────────────────────────────────────────────────────────
-//  MUFCalc :: main.cpp
+//  MUFCalc :: Validator
+//  Field-level input validation and physical-consistency checks.
+//  Returns one ValidationResult per failure; empty vector ⇒ valid input.
 // ─────────────────────────────────────────────────────────────────────────
 
-#include "app/Application.h"
-#include "gui/MainWindow.h"
+#include "../core/Types.h"
 
-int main(int argc, char* argv[]) {
-    MUFCalc::Application app(argc, argv);
-    MainWindow w;
-    w.show();
-    return app.exec();
-}
+namespace MUFCalc {
+
+class Validator {
+public:
+    QVector<ValidationResult> validate(const MufInput& input) const;
+};
+
+}  // namespace MUFCalc

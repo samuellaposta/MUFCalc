@@ -1,13 +1,16 @@
+#pragma once
 // ─────────────────────────────────────────────────────────────────────────
-//  MUFCalc :: main.cpp
+//  MUFCalc :: EquationsTab
+//  Step-by-step IAEA equation rendering with substituted values.
 // ─────────────────────────────────────────────────────────────────────────
 
-#include "app/Application.h"
-#include "gui/MainWindow.h"
+#include <QWidget>
+#include "../core/Types.h"
 
-int main(int argc, char* argv[]) {
-    MUFCalc::Application app(argc, argv);
-    MainWindow w;
-    w.show();
-    return app.exec();
-}
+class EquationsTab : public QWidget {
+    Q_OBJECT
+public:
+    EquationsTab(const MUFCalc::MufInput& input,
+                 const MUFCalc::MufResult& result,
+                 QWidget* parent = nullptr);
+};

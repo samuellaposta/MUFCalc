@@ -1,13 +1,18 @@
+#pragma once
 // ─────────────────────────────────────────────────────────────────────────
-//  MUFCalc :: main.cpp
+//  MUFCalc :: Application
+//  Slim wrapper over QApplication that centralises app-level setup
+//  (font, organisation/version metadata, locale).
 // ─────────────────────────────────────────────────────────────────────────
 
-#include "app/Application.h"
-#include "gui/MainWindow.h"
+#include <QApplication>
 
-int main(int argc, char* argv[]) {
-    MUFCalc::Application app(argc, argv);
-    MainWindow w;
-    w.show();
-    return app.exec();
-}
+namespace MUFCalc {
+
+class Application : public QApplication {
+    Q_OBJECT
+public:
+    Application(int& argc, char** argv);
+};
+
+}  // namespace MUFCalc

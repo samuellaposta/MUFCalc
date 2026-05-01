@@ -1,0 +1,113 @@
+# ─────────────────────────────────────────────────────────────────────
+#  MUFCalc — Windows installer build & release workflow
+#
+#  Triggers:
+#    1. push to main          → builds the installer, uploads as artifact
+#    2. tag v*.*.*            → builds + creates a GitHub Release
+#    3. manual (Run workflow) → builds the installer on demand
+#
+#  Required repository secret:
+#    MUFCALC_GITHUB_TOKEN  — your classic PAT with public_repo scope.
+#
+#  Add the secret at:
+#    Settings → Secrets and variables → Actions → New repository secret
+# ─────────────────────────────────────────────────────────────────────
+name: Build Windows Installer
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*.*.*']
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    name: Build & package on Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Qt 6
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.2'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_mingw'
+          modules: ''
+          cache: true
+
+      - name: Install MinGW
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-make
+          update: false
+
+      - name: Inject GITHUB_TOKEN secret into local_token.h
+        shell: pwsh
+        run: |
+          $token = '${{ secrets.MUFCALC_GITHUB_TOKEN }}'
+          if ([string]::IsNullOrWhiteSpace($token)) {
+            Write-Error "MUFCALC_GITHUB_TOKEN secret is not set on this repo. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          }
+          $content = "#define MUFCALC_GITHUB_TOKEN `"$token`"`n"
+          Set-Content -Path "src/gui/local_token.h" -Value $content -NoNewline -Encoding ASCII
+          Write-Host "local_token.h written (length: $($content.Length) chars)"
+
+      - name: Configure with qmake
+        shell: cmd
+        run: |
+          mkdir build
+          cd build
+          qmake ../MUFCalc.pro CONFIG+=release
+
+      - name: Build
+        shell: cmd
+        run: |
+          cd build
+          mingw32-make -j2
+
+      - name: Stage runtime files with windeployqt
+        shell: cmd
+        run: |
+          mkdir deploy
+          copy build\release\MUFCalc.exe deploy\
+          windeployqt --release --no-translations --no-system-d3d-compiler --no-opengl-sw deploy\MUFCalc.exe
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          choco install innosetup --no-progress -y
+
+      - name: Compile installer
+        shell: cmd
+        run: |
+          "C:\Program Files (x86)\Inno Setup 6\iscc.exe" installer.iss
+
+      - name: Wipe local_token.h (defence in depth)
+        if: always()
+        shell: pwsh
+        run: |
+          Remove-Item -Path "src/gui/local_token.h" -ErrorAction SilentlyContinue
+          Write-Host "local_token.h removed from runner."
+
+      - name: Upload installer as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MUFCalcSetup_v2
+          path: Output/MUFCalcSetup_v2.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Attach installer to GitHub Release (only on tag pushes)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Output/MUFCalcSetup_v2.exe
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

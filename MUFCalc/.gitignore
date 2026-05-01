@@ -1,0 +1,36 @@
+# Token injection: real token never committed
+src/gui/local_token.h
+
+# Build outputs
+build/
+build-*/
+debug/
+release/
+*.o
+*.obj
+*.moc
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+.qmake.stash
+Makefile
+Makefile.*
+*.pro.user
+*.pro.user.*
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# Inno Setup output
+deploy/
+Output/
+*.exe.manifest
+
+# Qt Creator
+*.autosave
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

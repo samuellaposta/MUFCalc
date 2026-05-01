@@ -1,13 +1,19 @@
+#pragma once
 // ─────────────────────────────────────────────────────────────────────────
-//  MUFCalc :: main.cpp
+//  MUFCalc :: SignificantQuantity helper
+//  IAEA Safeguards Glossary 2022 §3.14
 // ─────────────────────────────────────────────────────────────────────────
 
-#include "app/Application.h"
-#include "gui/MainWindow.h"
+#include <QString>
+#include "../app/Constants.h"
 
-int main(int argc, char* argv[]) {
-    MUFCalc::Application app(argc, argv);
-    MainWindow w;
-    w.show();
-    return app.exec();
-}
+namespace MUFCalc {
+
+class SQResolver {
+public:
+    /// Maps a free-text material type to the IAEA SQ in kg.
+    /// Falls back to LEU (75 kg) for unrecognised types.
+    static double forMaterial(const QString& materialType);
+};
+
+}  // namespace MUFCalc

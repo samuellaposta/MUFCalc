@@ -1,0 +1,16 @@
+// ─────────────────────────────────────────────────────────────────────
+//  local_token.h.example  —  template for local development
+//
+//  HOW TO USE:
+//    1. Copy this file to local_token.h (same directory).
+//    2. Replace ghp_xxxxx... with your real GitHub Personal Access Token.
+//    3. Save. local_token.h is gitignored and will never be pushed.
+//
+//  You only need to do this once per Windows machine. Qt Creator
+//  rebuilds will pick it up automatically.
+//
+//  If you ever lose this file, regenerate the PAT at:
+//    https://github.com/settings/tokens
+//  Required scope: public_repo
+// ─────────────────────────────────────────────────────────────────────
+#define MUFCALC_GITHUB_TOKEN "ghp_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
