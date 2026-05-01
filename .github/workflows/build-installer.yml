@@ -22,6 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
      - name: Install Qt 6
+        id: qt
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.7.2'
@@ -32,6 +33,16 @@ jobs:
           add-tools-to-path: true
           modules: ''
           cache: true
+
+      - name: Show Qt install location
+        shell: cmd
+        run: |
+          echo IQTA_QT_BIN=%IQTA_QT_BIN%
+          echo Qt6_DIR=%Qt6_DIR%
+          echo QT_ROOT_DIR=%QT_ROOT_DIR%
+          where qmake
+          where qmake6
+          dir "${{ env.IQTA_QT_BIN }}" 2>nul || echo IQTA_QT_BIN unset
       
       - name: Inject GITHUB_TOKEN secret into local_token.h
         shell: pwsh
