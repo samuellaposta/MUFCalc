@@ -1,16 +1,8 @@
 # ─────────────────────────────────────────────────────────────────────
 #  MUFCalc — Windows installer build & release workflow
 #
-#  Triggers:
-#    1. push to main          → builds the installer, uploads as artifact
-#    2. tag v*.*.*            → builds + creates a GitHub Release
-#    3. manual (Run workflow) → builds the installer on demand
-#
-#  Required repository secret:
-#    MUFCALC_GITHUB_TOKEN  — your classic PAT with public_repo scope.
-#
-#  Add the secret at:
-#    Settings → Secrets and variables → Actions → New repository secret
+#  Repo layout: project source lives under MUFCalc/ subfolder, with
+#  installer.iss and .github/ at the repo root.
 # ─────────────────────────────────────────────────────────────────────
 name: Build Windows Installer
 
@@ -55,18 +47,20 @@ jobs:
             exit 1
           }
           $content = "#define MUFCALC_GITHUB_TOKEN `"$token`"`n"
-          Set-Content -Path "src/gui/local_token.h" -Value $content -NoNewline -Encoding ASCII
+          Set-Content -Path "MUFCalc/src/gui/local_token.h" -Value $content -NoNewline -Encoding ASCII
           Write-Host "local_token.h written (length: $($content.Length) chars)"
 
       - name: Configure with qmake
         shell: cmd
+        working-directory: MUFCalc
         run: |
           mkdir build
           cd build
-          qmake ../MUFCalc.pro CONFIG+=release
+          qmake ..\MUFCalc.pro CONFIG+=release
 
       - name: Build
         shell: cmd
+        working-directory: MUFCalc
         run: |
           cd build
           mingw32-make -j2
@@ -75,7 +69,7 @@ jobs:
         shell: cmd
         run: |
           mkdir deploy
-          copy build\release\MUFCalc.exe deploy\
+          copy MUFCalc\build\release\MUFCalc.exe deploy\
           windeployqt --release --no-translations --no-system-d3d-compiler --no-opengl-sw deploy\MUFCalc.exe
 
       - name: Install Inno Setup
@@ -92,7 +86,7 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          Remove-Item -Path "src/gui/local_token.h" -ErrorAction SilentlyContinue
+          Remove-Item -Path "MUFCalc/src/gui/local_token.h" -ErrorAction SilentlyContinue
           Write-Host "local_token.h removed from runner."
 
       - name: Upload installer as workflow artifact
