@@ -51,12 +51,15 @@ jobs:
         run: |
           mkdir build
           cd build
-          qmake ..\MUFCalc.pro CONFIG+=release
+          "%Qt6_DIR%\bin\qmake.exe" ..\MUFCalc.pro CONFIG+=release
+          echo --- which qmake will the build use? ---
+          "%Qt6_DIR%\bin\qmake.exe" -v
 
       - name: Build
         shell: cmd
         working-directory: MUFCalc
         run: |
+          set PATH=%Qt6_DIR%\bin;%PATH%
           cd build
           mingw32-make -j2
 
@@ -65,7 +68,7 @@ jobs:
         run: |
           mkdir deploy
           copy MUFCalc\build\release\MUFCalc.exe deploy\
-          windeployqt --release --no-translations --no-system-d3d-compiler --no-opengl-sw deploy\MUFCalc.exe
+          "%Qt6_DIR%\bin\windeployqt.exe" --release --no-translations --no-system-d3d-compiler --no-opengl-sw deploy\MUFCalc.exe
 
       - name: Install Inno Setup
         shell: pwsh
