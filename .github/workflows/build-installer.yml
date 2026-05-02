@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: Build & package on Windows
+   name: "Build & package on Windows"
     runs-on: windows-latest
 
     steps:
