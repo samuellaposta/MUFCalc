@@ -1,0 +1,110 @@
+name: Build Windows Installer
+on:
+  push:
+    branches: [main]
+    tags: ['v*.*.*']
+  workflow_dispatch: {}
+jobs:
+  build:
+    name: Build and package on Windows
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Install Qt 6
+        id: qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.2'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_mingw'
+          tools: 'tools_mingw1310'
+          add-tools-to-path: true
+          modules: ''
+          cache: true
+      - name: Show Qt install location
+        shell: cmd
+        run: |
+          echo IQTA_QT_BIN=%IQTA_QT_BIN%
+          echo Qt6_DIR=%Qt6_DIR%
+          echo QT_ROOT_DIR=%QT_ROOT_DIR%
+          echo IQTA_TOOLS=%IQTA_TOOLS%
+          where qmake
+          where cmake
+      - name: Inject GITHUB_TOKEN secret into local_token.h
+        shell: pwsh
+        run: |
+          $token = '${{ secrets.MUFCALC_GITHUB_TOKEN }}'
+          if ([string]::IsNullOrWhiteSpace($token)) {
+            Write-Error "MUFCALC_GITHUB_TOKEN secret is not set on this repo."
+            exit 1
+          }
+          $content = "#define MUFCALC_GITHUB_TOKEN `"$token`"`n"
+          Set-Content -Path "MUFCalc/src/gui/local_token.h" -Value $content -NoNewline -Encoding ASCII
+          Write-Host "local_token.h written"
+      - name: Configure with CMake
+        shell: cmd
+        working-directory: MUFCalc
+        run: |
+          cmake -S . -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="%QT_ROOT_DIR%"
+      - name: Build with CMake
+        shell: cmd
+        working-directory: MUFCalc
+        run: |
+          cmake --build build --config Release -j 2
+      - name: Locate built MUFCalc.exe
+        shell: cmd
+        working-directory: MUFCalc
+        run: |
+          dir /s /b build\MUFCalc.exe
+      - name: Stage runtime files with windeployqt
+        shell: cmd
+        run: |
+          mkdir MUFCalc\deploy
+          copy MUFCalc\build\MUFCalc.exe MUFCalc\deploy\ 2>nul || copy MUFCalc\build\Release\MUFCalc.exe MUFCalc\deploy\
+          "%QT_ROOT_DIR%\bin\windeployqt.exe" --release --no-translations --no-system-d3d-compiler --no-opengl-sw MUFCalc\deploy\MUFCalc.exe
+      - name: Copy MinGW runtime DLLs
+        shell: pwsh
+        run: |
+          $mingwBin = "$env:IQTA_TOOLS\mingw1310_64\bin"
+          Write-Host "Looking for MinGW DLLs in: $mingwBin"
+          if (-not (Test-Path $mingwBin)) {
+            Write-Host "Path not found, searching for mingw1310_64..."
+            $found = Get-ChildItem -Path "$env:IQTA_TOOLS\.." -Recurse -Directory -Filter "mingw1310_64" -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($found) { $mingwBin = Join-Path $found.FullName "bin" }
+          }
+          Copy-Item "$mingwBin\libgcc_s_seh-1.dll"  -Destination "MUFCalc\deploy\" -Force
+          Copy-Item "$mingwBin\libstdc++-6.dll"     -Destination "MUFCalc\deploy\" -Force
+          Copy-Item "$mingwBin\libwinpthread-1.dll" -Destination "MUFCalc\deploy\" -Force
+          Write-Host "DLLs in deploy folder:"
+          Get-ChildItem "MUFCalc\deploy\" -Filter "*.dll" | Select-Object Name
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          choco install innosetup --no-progress -y
+      - name: Compile installer
+        shell: cmd
+        working-directory: MUFCalc
+        run: |
+          "C:\Program Files (x86)\Inno Setup 6\iscc.exe" installer.iss
+      - name: Wipe local_token.h
+        if: always()
+        shell: pwsh
+        run: |
+          Remove-Item -Path "MUFCalc/src/gui/local_token.h" -ErrorAction SilentlyContinue
+      - name: Upload installer as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MUFCalcSetup_v2
+          path: MUFCalc/Output/MUFCalcSetup_v2.exe
+          if-no-files-found: error
+          retention-days: 30
+      - name: Attach installer to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: MUFCalc/Output/MUFCalcSetup_v2.exe
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
