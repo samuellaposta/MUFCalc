@@ -81,7 +81,7 @@ set(MUFCALC_GUI_HEADERS
     src/gui/NuclearTransferItemDb.h
 )
 
-add_executable(MUFCalc ${MUFCALC_GUI_SOURCES} ${MUFCALC_GUI_HEADERS}
+add_executable(MUFCalc WIN32 ${MUFCALC_GUI_SOURCES} ${MUFCALC_GUI_HEADERS}
                        resources/resources.qrc)
 target_link_libraries(MUFCalc PRIVATE mufcalc_core Qt6::Widgets Qt6::PrintSupport Qt6::Network)
 
